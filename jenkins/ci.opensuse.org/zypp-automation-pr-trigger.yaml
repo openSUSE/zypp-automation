@@ -1,0 +1,78 @@
+- job:
+    name: 'zypp-automation-pr-trigger'
+    node: machinery-worker0
+
+    parameters:
+      - choice:
+          name: mode
+          choices:
+            - normal
+            - rebuild
+            - forcerebuild
+            - all
+          description: |
+              normal: trigger unseen PRs
+              rebuild: trigger unseend and pending PRs
+              forcerebuild: trigger unseen, pending and failed PRs
+              all: trigger rebuild for all open PRs (even if status is successful)
+      - choice:
+          name: repositories
+          choices:
+            - "all"
+            - "openSUSE/libzypp"
+            - "openSUSE/zypper"
+          description: |
+            Only process the PRs of the selected repositories or all.
+            This can be useful for PR rebuilds (see 'mode' parameter).
+            Default is to process all repositories of the config file.
+
+    triggers:
+      - timed: 'H/10 * * * *'
+
+    logrotate:
+      numToKeep: 300
+      daysToKeep: -1
+
+    builders:
+      - shell: |
+          ## THIS IS A TRIGGER JOB ONLY - NO WORKER CODE IN HERE - DO NOT DARE TO ADD SOME
+          ## TRIGGER JOBS ARE MOVED TO A DEDICATED TRIGGER NODE
+          ## THIS JOB IS ABOUT PRs FOR THE AUTOMATION REPO
+          ## [[ $NODE_NAME =~ cloud.?trigger ]] || exit 99
+          ##
+
+          set -x
+
+          export automationrepo=~/github.com/bzeller/zypp-automation
+          # automation bootstrapping
+          if ! [ -e ${automationrepo}/scripts/jenkins/update_automation ] ; then
+            rm -rf ${automationrepo}
+            curl https://raw.githubusercontent.com/bzeller/zypp-automation/master/scripts/jenkins/update_automation | bash
+          fi
+          # fetch the latest automation updates
+          ${automationrepo}/scripts/jenkins/update_automation
+
+          export ghprrepo=~/github.com/openSUSE/github-pr
+          export ghpr=${ghprrepo}/github_pr.rb
+
+          buildmode=$mode
+          case $mode in
+            # mapping normal to unseen
+            normal|unseen) buildmode=unseen
+            ;;
+            # for backward compatibility
+            forcerebuildall) buildmode=all
+            ;;
+          esac
+
+          repos=
+          case $repositories in
+            all)
+              repos=
+              ;;
+            *)
+              repos="--only --org ${repositories%/*} --repo ${repositories##*/}"
+              ;;
+          esac
+
+          ${ghpr} -a trigger-prs $repos --mode "$buildmode" --debugratelimit --config ${automationrepo}/scripts/github_pr/github_pr_zypp.yaml

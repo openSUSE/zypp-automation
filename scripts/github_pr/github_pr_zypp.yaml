@@ -1,0 +1,53 @@
+interaction_dirs:
+  - ./interactions
+template:
+  user:
+    suse_zypp_user: &suse_zypp_user
+      - mlandres
+      - bzeller
+  team:
+    suse_zypp_team: &suse_zypp_team
+      - name: openSUSE/zypp
+        id: 159206
+  filter:
+    suse_automation: &suse_automation
+      - type: MergeBranch
+        config:
+          branches:
+            - master
+      - type: Status
+        config:
+          status: unseen
+      - type: TrustedSource
+        config:
+          users:
+            *suse_zypp_user
+          teams:
+            *suse_zypp_team
+        blacklist_handler:
+          - type: SetStatus
+            parameters:
+              status: success
+              message: zypp gating not applicable
+        whitelist_handler:
+          - type: SetStatus
+            parameters:
+              status: pending
+              message: Queued automation PR gating
+          - type: JenkinsJobTriggerPR
+            parameters:
+              detail_logging: true
+              job_name: zypp-build-pr
+              job_cmd: "../jenkins/jenkins-job-trigger"
+              job_parameters:
+                  standard:
+                    test: "ignoreme"
+pr_processing:
+  - config:
+      organization: openSUSE
+      repositories:
+        - libzypp
+        - zypper
+      context: openSUSE/zypp-pr/build
+    filter: *suse_automation
+
