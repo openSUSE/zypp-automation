@@ -59,11 +59,11 @@
         #  (unseen PR = no status reported from github_pr on last commit of this PR)
         set -x
 
-        export automationrepo=~/github.com/bzeller/zypp-automation
+        export automationrepo=~/github.com/openSUSE/zypp-automation
         # automation bootstrapping
         if ! [ -e ${automationrepo}/scripts/jenkins/update_automation ] ; then
           rm -rf ${automationrepo}
-          curl https://raw.githubusercontent.com/bzeller/zypp-automation/master/scripts/jenkins/update_automation | bash
+          curl https://raw.githubusercontent.com/openSUSE/zypp-automation/master/scripts/jenkins/update_automation | bash
         fi
         # fetch the latest automation updates
         ${automationrepo}/scripts/jenkins/update_automation

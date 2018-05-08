@@ -17,7 +17,7 @@ declare -a must_have_repos=(
 )
 
 # allow to override the automation repo
-: ${automation_repo:="github.com/bzeller/zypp-automation#master"}
+: ${automation_repo:="github.com/openSUSE/zypp-automation#master"}
 
 if [[ $automation_repo =~ ^(https?|git): || $automation_repo =~ \.git ]] ; then
     echo "Syntax error with automation repo definition."
