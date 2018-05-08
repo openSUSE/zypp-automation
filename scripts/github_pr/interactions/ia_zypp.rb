@@ -58,7 +58,7 @@ module GithubPR
     end
   end
 
-  class SetNotTrustedStatus < Action
+  class SetNotTrustedStatusAction < Action
     def action(pull)
 
       details = { 
