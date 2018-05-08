@@ -62,15 +62,14 @@ module GithubPR
   class SetNotTrustedStatusAction < Action
     def action(pull)
 
-      details = { 
-          "status" => "failure",
-          "message" => "Not a valid CI user, please ask a project contributor to trigger your build via #{JENKINS_URL}/job/#{@c["job_name"]}/parambuild/?#{parameters_to_uri(job_paras)}",
-          "target_url" => @c['target_url']
-      }
+      message = "Not a valid CI user, please ask a project contributor to trigger your build via #{JENKINS_URL}/job/#{@c["job_name"]}/parambuild/?#{parameters_to_uri(job_paras)}"
+
+      @c["status"] = "failure"
+      @c["message"] = message
 
       GithubClient.new(@metadata).create_status(pull.head.sha, @c)
     end
-    
+
     def parameters_to_uri(paras)
       URI.encode_www_form(paras)
     end
