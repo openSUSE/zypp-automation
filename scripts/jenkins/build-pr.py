@@ -136,7 +136,7 @@ if res != 0:
     sys.exit(1)
 
 #osc co -o zypp:Head/package <package>
-res = subprocess.call(["osc", "co", "zypp:Head/{}".format(base_proj), "-o", "obs_src"])
+res = subprocess.call(["osc", "-A", "https://api.opensuse.org", "co", "zypp:Head/{}".format(base_proj), "-o", "obs_src"])
 if res != 0:
     print("Failed to read OBS project configuration", file=sys.stderr)
     sys.exit(1)
@@ -213,7 +213,7 @@ buildEnv["OSC_BUILD_ROOT"] = buildRoot
 buildEnv["OSC_PACKAGECACHEDIR"] = packageCache
 
 #osc build --vm-type=kvm --vm-memory=2000 --clean openSUSE_Tumbleweed
-res = subprocess.call(["osc", "build", "--vm-type=kvm", "--vm-memory=2000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
+res = subprocess.call(["osc", "-A", "https://api.opensuse.org", "build", "--vm-type=kvm", "--vm-memory=4000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
                      cwd="obs_src",
                      env=buildEnv
 )
