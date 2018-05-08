@@ -18,13 +18,16 @@ def getCmakeVar (cmakefile, varname, required=True):
     # since cmake has no way to only query variables we resort to sed
     # sed -n -E  CMakeLists.txt
     regex = "s/^\\s?[sS][eE][tT]\\s?\\(\\s?{}\\s+\"([^\"]+)\"\\s?\\)\\s?$/\\1/p".format(varname)
-    res = subprocess.run(["sed", "-n", "-E", regex, cmakefile], stdout=subprocess.PIPE)
-    if res.returncode != 0:
+
+    res = None
+    try:
+        res = subprocess.check_output(["sed", "-n", "-E", regex, cmakefile])
+    except subprocess.CalledProcessError:
         print("Failed to read variable {} from cmake file".format(varname), file=sys.stderr)
         sys.exit(1)
 
     # convert to string and remove whitespace at beginning and end
-    result = res.stdout.decode() 
+    result = res.decode() 
     result = result.lstrip()
     result = result.rstrip()
 
@@ -62,8 +65,8 @@ def configureCmakeTemplate (cmakeTempl, vars):
     given in the vars dict.
     """
     for key in vars.keys():
-        res = subprocess.run(["sed", "-i", "s/@{}@/{}/".format(key, vars[key]), cmakeTempl] )
-        if res.returncode != 0:
+        ret = subprocess.call(["sed", "-i", "s/@{}@/{}/".format(key, vars[key]), cmakeTempl] )
+        if ret != 0:
             print("Failed to replace variable {} in file {}".format(key, cmakeTempl), file=sys.stderr)
             sys.exit(1)    
 
@@ -73,14 +76,17 @@ def rpmQuery (query, specfile):
     """
     if debug: print("Executing query {}".format(query))
 
-    res = subprocess.run(["rpmspec", "-q", "--srpm", "--qf", query, specfile], stdout=subprocess.PIPE)
-    if res.returncode != 0:
+    res = None
+    
+    try:
+        res = subprocess.check_output(["rpmspec", "-q", "--srpm", "--qf", query, specfile])
+    except subprocess.CalledProcessError:
         print("Failed to query spec file", file=sys.stderr)
         sys.exit(1)
 
-    if debug: print("Query result of {}: \"{}\"".format(query, res.stdout.decode()))
+    if debug: print("Query result of {}: \"{}\"".format(query, res.decode()))
 
-    return res.stdout.decode()
+    return res.decode()
 
 def guessTarballName (specfile):
     """
@@ -124,44 +130,44 @@ pr_sha      = conf[5]
 
 
 #clean up old builds
-res = subprocess.run(["bash", "-c" ,"rm -rf git_src obs_src"])
-if res.returncode != 0:
+res = subprocess.call(["bash", "-c" ,"rm -rf git_src obs_src"])
+if res != 0:
     print("Failed to read OBS project configuration", file=sys.stderr)
     sys.exit(1)
 
 #osc co -o zypp:Head/package <package>
-res = subprocess.run(["osc", "co", "zypp:Head/{}".format(base_proj), "-o", "obs_src"])
-if res.returncode != 0:
+res = subprocess.call(["osc", "co", "zypp:Head/{}".format(base_proj), "-o", "obs_src"])
+if res != 0:
     print("Failed to read OBS project configuration", file=sys.stderr)
     sys.exit(1)
 
 #git branch ${org_repo} git_src
-res = subprocess.run(["git", "clone", "git://github.com/{}/{}".format(base_org, base_proj), "git_src"])
-if res.returncode != 0:
+res = subprocess.call(["git", "clone", "git://github.com/{}/{}".format(base_org, base_proj), "git_src"])
+if res != 0:
     print("Failed to clone git project", file=sys.stderr)
     sys.exit(1)
 
 #git checkout target branch
-res = subprocess.run(["git", "checkout", base_branch], cwd="git_src")
-if res.returncode != 0:
+res = subprocess.call(["git", "checkout", base_branch], cwd="git_src")
+if res != 0:
     print("Failed to checkout base branch", file=sys.stderr)
     sys.exit(1)
 
 #git remote add PR ${git_pr_repo}
-res = subprocess.run(["git", "remote", "add", "PR","git://github.com/{}".format(pr_repo)], cwd="git_src")
-if res.returncode != 0:
+res = subprocess.call(["git", "remote", "add", "PR","git://github.com/{}".format(pr_repo)], cwd="git_src")
+if res != 0:
     print("Failed to add the PR remote", file=sys.stderr)
     sys.exit(1)
 
 #git fetch PR ${git_pr_branch}
-res = subprocess.run(["git", "fetch", "PR"], cwd="git_src")
-if res.returncode != 0:
+res = subprocess.call(["git", "fetch", "PR"], cwd="git_src")
+if res != 0:
     print("Failed to fetch the PR remote", file=sys.stderr)
     sys.exit(1)
 
 #git merge ${git_pr_sha}
-res = subprocess.run(["git", "merge", pr_sha], cwd="git_src")
-if res.returncode != 0:
+res = subprocess.call(["git", "merge", pr_sha], cwd="git_src")
+if res != 0:
     print("Failed to merge the PR", file=sys.stderr)
     sys.exit(1)
 
@@ -175,8 +181,8 @@ print("Package Version: {}".format(ver_str))
 
 #build specfile from spec.cmake
 specfile = "obs_src/{}.spec".format(package_str)
-res = subprocess.run(["cp", "git_src/{}.spec.cmake".format(package_str), specfile])
-if res.returncode != 0:
+res = subprocess.call(["cp", "git_src/{}.spec.cmake".format(package_str), specfile])
+if res != 0:
     print("Failed to move spec file", file=sys.stderr)
     sys.exit(1)
 
@@ -191,8 +197,8 @@ srcRootDir = rpmQuery("%{name}-%{version}", specfile)
 
 #tar source using version name
 # tar -cjf ../libzypp.tar-bz2 --transform 's,^\.,libzypp,' .
-res = subprocess.run(["tar", "cjf", "../obs_src/{}".format(tarfile), "--transform", 's,^\\.,{},'.format(srcRootDir), "--exclude", ".git", '.'], cwd="git_src")
-if res.returncode != 0:
+res = subprocess.call(["tar", "cjf", "../obs_src/{}".format(tarfile), "--transform", 's,^\\.,{},'.format(srcRootDir), "--exclude", ".git", '.'], cwd="git_src")
+if res != 0:
     print("Failed to tar src dir", file=sys.stderr)
     sys.exit(1)   
 
@@ -207,12 +213,12 @@ buildEnv["OSC_BUILD_ROOT"] = buildRoot
 buildEnv["OSC_PACKAGECACHEDIR"] = packageCache
 
 #osc build --vm-type=kvm --vm-memory=2000 --clean openSUSE_Tumbleweed
-res = subprocess.run(["osc", "build", "--vm-type=kvm", "--vm-memory=2000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
+res = subprocess.call(["osc", "build", "--vm-type=kvm", "--vm-memory=2000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
                      cwd="obs_src",
                      env=buildEnv
 )
 
-if res.returncode != 0:
+if res != 0:
     print("Failed to build PR", file=sys.stderr)
     sys.exit(1)   
 
