@@ -2,8 +2,9 @@
 require "open-uri"
 
 module GithubPR
+  JENKINS_URL="https://ci.opensuse.org"
+  
   class JenkinsJobTriggerAction < RunCommandAction
-	  JENKINS_URL="https://ci.opensuse.org"
 
     def logging?
       @c.has_key?("detail_logging") && @c["detail_logging"]
