@@ -3,7 +3,7 @@ require "open-uri"
 
 module GithubPR
   JENKINS_URL="https://ci.opensuse.org"
-  
+
   class JenkinsJobTriggerAction < RunCommandAction
 
     def logging?
@@ -70,6 +70,11 @@ module GithubPR
 
       GithubClient.new(@metadata).create_status(pull.head.sha, @c)
     end
+    
+    def parameters_to_uri(paras)
+      URI.encode_www_form(paras)
+    end
+
   end
 
 end
