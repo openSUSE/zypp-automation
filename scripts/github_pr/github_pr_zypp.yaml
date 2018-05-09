@@ -25,9 +25,10 @@ template:
           teams:
             *suse_zypp_team
         blacklist_handler:
-          - type: SetNotTrustedStatus
+          - type: SetStatus
             parameters:
-              status: failure
+              status: success
+              message: zypp gating not applicable
         whitelist_handler:
           - type: SetStatus
             parameters:
