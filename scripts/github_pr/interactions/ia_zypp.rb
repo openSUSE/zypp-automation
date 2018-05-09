@@ -74,4 +74,12 @@ module GithubPR
       trusted_label?(pull) || super(pull)
     end
   end
+
+  class LogPullRequestIgnoredAction < LogPullRequestDetailsAction
+    def action(pull)
+      super(pull)
+      puts "Ignored due to untrusted source, set the ci-approved label to execute"
+    end
+  end
+
 end
