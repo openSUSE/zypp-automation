@@ -26,6 +26,8 @@ template:
             *suse_zypp_team
         blacklist_handler:
           - type: SetNotTrustedStatus
+            parameters:
+              status: failure
         whitelist_handler:
           - type: SetStatus
             parameters:
