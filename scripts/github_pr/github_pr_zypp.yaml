@@ -27,7 +27,7 @@ template:
         blacklist_handler:
           - type: SetStatus
             parameters:
-              status: success
+              status: failure
               message: zypp gating not applicable
         whitelist_handler:
           - type: SetStatus
