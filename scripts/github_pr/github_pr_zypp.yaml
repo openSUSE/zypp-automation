@@ -20,14 +20,14 @@ template:
       - type: Status
         config:
           status: unseen
-      - type: TrustedSource
+      - type: TrustedSourceExt
         config:
           users:
             *suse_zypp_user
           teams:
             *suse_zypp_team
         blacklist_handler:
-          - type: RunCommandAction
+          - type: RunCommand
             command: echo
             parameters:
               - "Ignoring pull request, user is not trusted:"
