@@ -25,10 +25,11 @@ template:
           teams:
             *suse_zypp_team
         blacklist_handler:
-          - type: SetStatus
+          - type: RunCommandAction
+            command: echo
             parameters:
-              status: failure
-              message: zypp gating not applicable
+              - "Ignoring pull request, user is not trusted:"
+          - type: LogPullRequestDetails
         whitelist_handler:
           - type: SetStatus
             parameters:
