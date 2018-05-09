@@ -58,4 +58,19 @@ module GithubPR
       }
     end
   end
+
+  class TrustedSourceExtFilter < TrustedSourceFilter
+    def trusted_label?(pull)
+      pulls.labels.each do |label|
+        if label.name == "ci-approved" then
+          puts "Found label ci-approved in #{@metadata[:repository]} PR #{pull.number} #{pull.head.sha[0,8]}"
+          return true
+        end
+      end
+      false
+    end
+
+    def filter_applies?(pull)
+      trusted_label?(pull) || super(pull)
+    end
 end

@@ -9,6 +9,8 @@ template:
     suse_zypp_team: &suse_zypp_team
       - name: openSUSE/zypp
         id: 159206
+      - name: suse-employees
+        id: 158157
   filter:
     suse_automation: &suse_automation
       - type: MergeBranch
