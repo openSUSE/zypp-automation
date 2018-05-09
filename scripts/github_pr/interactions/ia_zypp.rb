@@ -73,4 +73,5 @@ module GithubPR
     def filter_applies?(pull)
       trusted_label?(pull) || super(pull)
     end
+  end
 end
