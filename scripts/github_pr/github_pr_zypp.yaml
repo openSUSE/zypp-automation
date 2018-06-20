@@ -5,6 +5,7 @@ template:
     suse_zypp_user: &suse_zypp_user
       - mlandres
       - bzeller
+      - openSUSE
   team:
     suse_zypp_team: &suse_zypp_team
       - name: openSUSE/zypp
