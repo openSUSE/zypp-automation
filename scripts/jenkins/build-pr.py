@@ -213,7 +213,7 @@ buildEnv["OSC_BUILD_ROOT"] = buildRoot
 buildEnv["OSC_PACKAGECACHEDIR"] = packageCache
 
 #osc build --vm-type=kvm --vm-memory=2000 --clean openSUSE_Tumbleweed
-res = subprocess.call(["osc", "-A", "https://api.opensuse.org", "build", "--vm-type=kvm", "--vm-memory=4000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
+res = subprocess.call(["osc", "-A", "https://api.opensuse.org", "build", "--vm-type=kvm", "--vm-memory=4000", "--vm-disk-size=6000", "--clean", "--trust-all-projects" ,"openSUSE_Tumbleweed"], 
                      cwd="obs_src",
                      env=buildEnv
 )
