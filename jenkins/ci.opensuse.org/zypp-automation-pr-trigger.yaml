@@ -1,6 +1,6 @@
 - job:
     name: 'zypp-automation-pr-trigger'
-    node: machinery-worker0
+    node: zypp-worker
 
     parameters:
       - choice:

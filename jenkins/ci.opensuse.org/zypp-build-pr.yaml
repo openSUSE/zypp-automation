@@ -1,6 +1,6 @@
 - job:
     name: 'zypp-build-pr'
-    node: 'machinery-worker0'
+    node: 'zypp-worker'
     concurrent: true
     description: |
       <!-- Managed by Jenkins Job Builder -->
